@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks # 1. Import BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Request
 from services.downloader_service import YTDLPService
 from models.requests import FacebookDownloadRequest
 import tempfile
@@ -8,12 +8,11 @@ router = APIRouter()
 downloader_service = YTDLPService()
 
 @router.post("/facebook/download")
-# 2. Add background_tasks to the function signature
-async def download_facebook_video(request: FacebookDownloadRequest, background_tasks: BackgroundTasks):
+async def download_facebook_video(request: Request, fb_request: FacebookDownloadRequest, background_tasks: BackgroundTasks):
     # Create a temporary file with a unique name
     with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as temp_cookie_file:
         # Write the user-provided cookies to this file
-        temp_cookie_file.write(request.cookies)
+        temp_cookie_file.write(fb_request.cookies)
         cookie_file_path = temp_cookie_file.name
         
     custom_opts = {
@@ -21,9 +20,10 @@ async def download_facebook_video(request: FacebookDownloadRequest, background_t
     }
 
     try:
-        # 3. Pass background_tasks to the download service
+        # Call the download service with the path to the cookie file
         result = downloader_service.download_video(
-            url=request.url,
+            url=fb_request.url,
+            request=request,
             background_tasks=background_tasks,
             custom_opts=custom_opts
         )
