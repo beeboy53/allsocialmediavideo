@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+gunicorn
+yt-dlp
+telethon
+python-dotenv
