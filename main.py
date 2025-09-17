@@ -1,14 +1,12 @@
-# main.py
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.staticfiles import StaticFiles  # <-- 1. Import StaticFiles
+from fastapi.responses import FileResponse # <-- Import FileResponse
 from routers import youtube, facebook, tiktok, generic
+import os
 
 app = FastAPI()
 
 # --- CORS Middleware Configuration ---
-# ... (your CORS code is the same)
 origins = [
     "https://saveclips.download",
     "https://www.saveclips.download",
@@ -24,16 +22,24 @@ app.add_middleware(
 
 # Include all the platform-specific routers
 app.include_router(youtube.router, tags=["YouTube"])
-app.include_router(facebook.router, tags=["Facebook"])
-app.include_router(tiktok.router, tags=["TikTok"])
-app.include_router(generic.router, tags=["Generic"])
+# ... (include your other routers)
+
+# --- NEW: Proper Download Endpoint ---
+@app.get("/download/{filename}")
+async def download_file(filename: str):
+    """
+    Serves a downloaded file and forces the browser to download it.
+    """
+    file_path = os.path.join("downloads", filename)
+    if os.path.exists(file_path):
+        return FileResponse(
+            path=file_path,
+            media_type='application/octet-stream',
+            filename=filename
+        )
+    return {"error": "File not found."}
+# ------------------------------------
 
 @app.get("/")
 async def root():
     return {"message": "Multi-platform video downloader API is running."}
-
-# --------------------------------------------------------------------------
-# 2. ADD THIS LINE TO SERVE THE DOWNLOADED FILES
-# --------------------------------------------------------------------------
-app.mount("/downloads", StaticFiles(directory="downloads"), name="downloads")
-
