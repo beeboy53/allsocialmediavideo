@@ -1,4 +1,6 @@
-from fastapi import APIRouter, BackgroundTasks
+# routers/generic.py
+
+from fastapi import APIRouter, BackgroundTasks, Request # <-- Import Request
 from services.downloader_service import YTDLPService
 from models.requests import GenericDownloadRequest
 
@@ -6,14 +8,11 @@ router = APIRouter()
 downloader_service = YTDLPService()
 
 @router.post("/generic/download")
-async def download_generic_video(request: GenericDownloadRequest, background_tasks: BackgroundTasks):
-    """
-    Handles video downloads from any generic URL supported by yt-dlp.
-    This serves as a fallback for non-social media links.
-    """
-    # No custom options are needed for the generic case
+                                             # 👇 Add request: Request here
+async def download_generic_video(request: Request, generic_req: GenericDownloadRequest, background_tasks: BackgroundTasks):
     result = downloader_service.download_video(
-        url=request.url,
+        url=generic_req.url,
+        request=request, # <-- Pass the request object
         background_tasks=background_tasks
     )
     return result
