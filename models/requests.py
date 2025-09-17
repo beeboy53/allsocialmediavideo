@@ -15,9 +15,7 @@ class FacebookDownloadRequest(BaseModel):
 class TikTokDownloadRequest(BaseModel):
     url: str
 
-class TelegramDownloadRequest(BaseModel):
-    url: str
-
 # ADD THIS NEW MODEL
 class GenericDownloadRequest(BaseModel):
+
     url: str
