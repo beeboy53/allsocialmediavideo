@@ -36,3 +36,4 @@ async def root():
 # 2. ADD THIS LINE TO SERVE THE DOWNLOADED FILES
 # --------------------------------------------------------------------------
 app.mount("/downloads", StaticFiles(directory="downloads"), name="downloads")
+
