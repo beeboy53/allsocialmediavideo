@@ -37,18 +37,17 @@ class YTDLPService:
                     background_tasks.add_task(delete_file_after_delay, file_path=downloaded_file_path, delay_seconds=1200)
 
                     file_name_only = os.path.basename(downloaded_file_path)
-download_url = f"{str(request.base_url).rstrip('/')}/download/{file_name_only}"
-
-return {
-    "title": info.get('title', 'N/A'),
-    "thumbnail": info.get('thumbnail', None),
-    "download_url": download_url
-}
+                    download_url = f"{str(request.base_url).rstrip('/')}/downloads/{file_name_only}"
                     
+                    # --- THIS IS THE UPDATED PART ---
+                    return {
+                        "title": info.get('title', 'N/A'),
+                        "thumbnail": info.get('thumbnail', None),
+                        "download_url": download_url
+                    }
                 
         except Exception as e:
             error_message = str(e)
             if 'DownloadError' in str(type(e)):
                  raise HTTPException(status_code=404, detail=f"Video not found or access denied: {error_message}")
             raise HTTPException(status_code=500, detail=f"An internal error occurred: {error_message}")
-
