@@ -5,8 +5,7 @@ from typing import Optional
 
 class YouTubeDownloadRequest(BaseModel):
     url: str
-    resolution: Optional[str] = None
-    cookies: Optional[str] = None
+    cookies: Optional[str] = None # <-- resolution field removed
 
 class FacebookDownloadRequest(BaseModel):
     url: str
@@ -15,7 +14,5 @@ class FacebookDownloadRequest(BaseModel):
 class TikTokDownloadRequest(BaseModel):
     url: str
 
-# ADD THIS NEW MODEL
 class GenericDownloadRequest(BaseModel):
-
     url: str
