@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
+# routers/youtube.py
+
+from fastapi import APIRouter, BackgroundTasks, Request
 from services.downloader_service import YTDLPService
 from models.requests import YouTubeDownloadRequest
 import tempfile
@@ -11,10 +13,7 @@ downloader_service = YTDLPService()
 async def download_youtube_video(request: Request, yt_request: YouTubeDownloadRequest, background_tasks: BackgroundTasks):
     custom_opts = {}
     
-    if yt_request.resolution:
-        resolution_val = yt_request.resolution.replace('p', '')
-        format_str = f'bestvideo[ext=mp4][height<={resolution_val}]+bestaudio[ext=m4a]/best[ext=mp4]/best'
-        custom_opts['format'] = format_str
+    # The logic for handling resolution has been removed.
 
     if yt_request.cookies:
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as temp_cookie_file:
