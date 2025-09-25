@@ -24,7 +24,14 @@ class YTDLPService:
     def download_video(self, url: str, request: Request, background_tasks: BackgroundTasks, custom_opts: dict = None) -> dict:
         filename = f"{uuid.uuid4()}.%(ext)s"
         out_template = os.path.join(self.download_path, filename)
-        ydl_opts = { 'format': 'bestvideo[ext=mp4][height<=1080]+bestaudio[ext=m4a]/best[ext=mp4]/best', 'outtmpl': out_template, 'merge_output_format': 'mp4', 'noplaylist': True, }
+        
+        ydl_opts = {
+            # --- THIS IS THE UPDATED LINE ---
+            'format': 'bestvideo[height<=1080]+bestaudio/best', # More flexible format selection
+            'outtmpl': out_template,
+            'merge_output_format': 'mp4', # Ensures final file is always MP4
+            'noplaylist': True,
+        }
         if custom_opts: ydl_opts.update(custom_opts)
 
         try:
@@ -35,11 +42,10 @@ class YTDLPService:
                 if os.path.exists(downloaded_file_path):
                     print(f"⏰ Scheduling file for deletion in 20 minutes: {downloaded_file_path}")
                     background_tasks.add_task(delete_file_after_delay, file_path=downloaded_file_path, delay_seconds=1200)
-
-                    file_name_only = os.path.basename(downloaded_file_path)
-                    download_url = f"{str(request.base_url).rstrip('/')}/downloads/{file_name_only}"
                     
-                    # --- THIS IS THE UPDATED PART ---
+                    file_name_only = os.path.basename(downloaded_file_path)
+                    download_url = f"{str(request.base_url).rstrip('/')}/download/{file_name_only}"
+                    
                     return {
                         "title": info.get('title', 'N/A'),
                         "thumbnail": info.get('thumbnail', None),
