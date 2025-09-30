@@ -23,11 +23,11 @@ class YTDLPService:
         out_template = os.path.join(self.download_path, filename)
         
         ydl_opts = {
-            'format': 'bestvideo[height<=1080]+bestaudio/best',
-            'outtmpl': out_template,
-            'merge_output_format': 'mp4',
-            'noplaylist': True,
-        }
+    'format': 'best[ext=mp4]/best', # <-- Find the best pre-merged MP4 file
+    'outtmpl': out_template,
+    # 'merge_output_format' is no longer needed since we are not merging
+    'noplaylist': True,
+}
         if custom_opts: 
             ydl_opts.update(custom_opts)
 
@@ -56,3 +56,4 @@ class YTDLPService:
             if 'DownloadError' in str(type(e)) or 'yt-dlp' in error_message:
                  raise HTTPException(status_code=404, detail=f"Video not found or access denied: {error_message}")
             raise HTTPException(status_code=500, detail=f"An internal error occurred: {error_message}")
+
