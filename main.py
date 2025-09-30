@@ -14,7 +14,10 @@ app = FastAPI()
 origins = [
     "https://saveclips.download",
     "https://www.saveclips.download",
+    "http://saveclips.download",
+    "http://www.saveclips.download",
 ]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -22,7 +25,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # --- New File Serving Endpoint ---
 # This replaces the old app.mount() and correctly handles CORS
 @app.get("/downloads/{file_name}")
@@ -48,3 +50,4 @@ async def root():
 
 # Note: The 'app.mount("/downloads", StaticFiles(directory="downloads"))' line 
 # has been removed because the new endpoint above handles this functionality now.
+
