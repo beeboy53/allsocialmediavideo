@@ -1,5 +1,7 @@
 fastapi
-uvicorn
+uvicorn[standard]
 gunicorn
 yt-dlp
-requests
+telethon
+python-dotenv
+httpx
