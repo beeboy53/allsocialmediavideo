@@ -131,11 +131,45 @@ class YTDLPService:
             logger.error(f"yt-dlp DownloadError for {url}: {error_msg}")
 
             if "Requested format is not available" in error_msg:
+                # Auto-retry with the safest possible format before giving up.
+                # This catches Shorts, live streams, and any edge-case format mismatch.
+                logger.warning(f"Format not available, retrying with 'best' fallback: {url}")
+                fallback_opts = dict(opts)
+                fallback_opts["format"] = "best[ext=mp4]/best"
+                try:
+                    with yt_dlp.YoutubeDL(fallback_opts) as ydl2:
+                        info = ydl2.extract_info(url, download=True)
+                        downloaded_path = None
+                        requested = info.get("requested_downloads") or []
+                        if requested and requested[0].get("filepath"):
+                            downloaded_path = requested[0]["filepath"]
+                        if not downloaded_path or not os.path.exists(downloaded_path):
+                            for fname in os.listdir(self.download_path):
+                                if fname.startswith(unique_id):
+                                    downloaded_path = os.path.join(self.download_path, fname)
+                                    break
+                        if downloaded_path and os.path.exists(downloaded_path):
+                            background_tasks.add_task(
+                                delete_file_after_delay,
+                                file_path=downloaded_path,
+                                delay_seconds=1200,
+                            )
+                            return {
+                                "file_path": downloaded_path,
+                                "title": info.get("title", "Unknown"),
+                                "uploader": info.get("uploader") or info.get("channel") or "Unknown",
+                                "duration": info.get("duration"),
+                                "thumbnail": info.get("thumbnail"),
+                            }
+                except Exception as retry_err:
+                    logger.error(f"Fallback retry also failed: {retry_err}")
+
                 raise HTTPException(
                     status_code=422,
                     detail=(
-                        "Requested format/resolution is not available for this video. "
-                        "Try a lower resolution or omit the resolution field."
+                        "No downloadable format found for this video. "
+                        "This may be a Shorts, live stream, or members-only video. "
+                        "Try omitting the resolution field, or add cookies for age-restricted content."
                     ),
                 )
             if "Private video" in error_msg or "Sign in" in error_msg:
