@@ -1,7 +1,0 @@
-fastapi
-uvicorn[standard]
-gunicorn
-yt-dlp
-telethon
-python-dotenv
-httpx
